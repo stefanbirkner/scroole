@@ -1,0 +1,4 @@
+name: java.lang.String
+count: int
+children: Simple[]
+numbers: java.util.Set<java.util.List<java.lang.Integer>>
