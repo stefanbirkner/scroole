@@ -94,6 +94,78 @@ Scroole creates a class `CheckList` that looks like this:
       }
     }
 
+### Javadoc
+
+Comments can be added to the Scroole file and they are translated to Javadoc.
+Comments at top of the Scroole file are written as class Javadoc. Comments
+before fields are written to the fields getter. Leave at least one empty line
+between the class comment and the comment of the first field. This is the
+Scroole file from the example above with some Javadoc.
+
+    # A check list is a list of items with a title.
+    #
+    # @since 1.0.0
+
+    # Returns the title of the check list.
+    #
+    # @return the title of the check list.
+    title: String
+    # Returns the the check list items.
+    #
+    # @return the the check list items.
+    items: java.util.List<com.github.stefanbirkner.CheckListItem>
+
+You may add empty lines before the comment of a field but you don't have
+to.
+
+    # @return the title of the check list.
+    title: String
+
+    # Return the the check list items.
+
+
+Scroole creates a class `CheckList` with Javadoc that looks like this:
+
+    package com.github.stefanbirkner;
+
+    ...
+
+    /**
+     * A check list is a list of items with a title.
+     *
+     * @since 1.0.0
+     */
+    public class CheckList {
+      private final String title;
+
+      private final List<CheckListItem> items;
+
+      public CheckList(String title, List<CheckListItem> items) {
+        this.title = title;
+        this.items = items;
+      }
+
+      /**
+       * Returns the title of the check list.
+       *
+       * @return the title of the check list.
+       */
+      public String getTitle() {
+        return title;
+      }
+
+      /**
+       * Returns the the check list items.
+       *
+       * @return the the check list items.
+       */
+      public List<CheckListItem> getItems() {
+        return items;
+      }
+
+      ...
+    }
+
 ## Contributing
 
 You have three options if you have a feature request, found a bug or

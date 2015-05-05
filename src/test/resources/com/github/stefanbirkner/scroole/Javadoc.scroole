@@ -1,0 +1,13 @@
+# A simple class with Javadoc.
+#
+# @since 1.0.0
+
+# Returns the name.
+#
+# @return the name.
+name: String
+
+# Returns the count.
+#
+# @return the count.
+count: int

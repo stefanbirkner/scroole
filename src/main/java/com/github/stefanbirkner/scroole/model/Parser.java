@@ -52,27 +52,56 @@ public class Parser {
 
     private static class EventHandler {
         ClassModelBuilder builder;
+        boolean classCommentSet = false;
+        StringBuilder comment = new StringBuilder();
 
         EventHandler(ClassModelBuilder builder) {
             this.builder = builder;
         }
 
         void line(String line) {
-            if (!line.trim().isEmpty())
+            if (line.trim().isEmpty())
+                handleSeparator();
+            else if (line.startsWith("#"))
+                handleCommentLine(line);
+            else
                 handleFieldLine(line);
+        }
+
+        private void handleSeparator() {
+            if (!classCommentSet)
+                builder.setJavadoc(comment.toString());
+            classCommentSet = true;
+            clearComment();
+        }
+
+        private void handleCommentLine(String line) {
+            if (comment.length() != 0) {
+                comment.append("\n");
+            }
+            //skip # symbol and following whitespace separator
+            String lineOfComment = line.startsWith("# ") ? line.substring(2)
+                    : line.substring(1);
+            comment.append(lineOfComment);
         }
 
         void handleFieldLine(String line) {
             String[] nameAndType = line.split(":");
             Field field = new Field(nameAndType[0].trim(),
-                    nameAndType[1].trim());
+                    nameAndType[1].trim(), comment.toString());
             builder.addField(field);
+            clearComment();
+        }
+
+        private void clearComment() {
+            comment = new StringBuilder();
         }
     }
 
     private static class ClassModelBuilder {
         String packageName;
         String simpleName;
+        String javadoc = "";
         List<Field> fields = new ArrayList<>();
 
         void setPackageName(String packageName) {
@@ -83,13 +112,17 @@ public class Parser {
             this.simpleName = simpleName;
         }
 
+        void setJavadoc(String javadoc) {
+            this.javadoc = javadoc;
+        }
+
         void addField(Field field) {
             fields.add(field);
         }
 
         ClassSpecification toClassModel() {
             return new ClassSpecification(
-                    packageName, simpleName, fields);
+                    packageName, simpleName, javadoc, fields);
         }
     }
 }

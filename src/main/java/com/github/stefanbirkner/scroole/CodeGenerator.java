@@ -38,6 +38,7 @@ public class CodeGenerator {
 
     private TypeSpec getTypeSpec(ClassSpecification specification) {
         TypeSpec.Builder builder = classBuilder(specification.simpleName)
+                .addJavadoc(formatJavadoc(specification.javadoc))
                 .addModifiers(Modifier.PUBLIC);
         List<ExtendedFieldSpec> fields = FIELD_MAPPER.map(specification.fields);
         List<FieldSpec> fieldSpecs = extractFieldSpecs(fields);
@@ -90,6 +91,7 @@ public class CodeGenerator {
         String name = "get" + capitalize(field.fieldSpec.name);
         return MethodSpec.methodBuilder(name)
                 .returns(field.fieldSpec.type)
+                .addJavadoc(formatJavadoc(field.javadoc))
                 .addModifiers(Modifier.PUBLIC)
                 .addStatement("return $L", field.fieldSpec.name)
                 .build();
@@ -150,6 +152,10 @@ public class CodeGenerator {
             if (field.type == FieldType.OBJECT)
                 return true;
         return false;
+    }
+
+    private String formatJavadoc(String javadoc) {
+        return javadoc.isEmpty() ? "" : javadoc + "\n";
     }
 
     private enum FieldType {
@@ -254,7 +260,7 @@ public class CodeGenerator {
             TypeName typeName = getTypeName(field.type);
             FieldSpec fieldSpec = FieldSpec.builder(typeName, field.name,
                     Modifier.PRIVATE, Modifier.FINAL).build();
-            return new ExtendedFieldSpec(fieldSpec, type);
+            return new ExtendedFieldSpec(fieldSpec, field.javadoc, type);
         }
 
         private FieldType getType(String typeAsString) {
@@ -305,11 +311,13 @@ public class CodeGenerator {
 
     private static class ExtendedFieldSpec {
         final FieldSpec fieldSpec;
+        final String javadoc;
         final FieldType type;
 
-        ExtendedFieldSpec(FieldSpec fieldSpec,
+        ExtendedFieldSpec(FieldSpec fieldSpec, String javadoc,
                 FieldType type) {
             this.fieldSpec = fieldSpec;
+            this.javadoc = javadoc;
             this.type = type;
         }
     }

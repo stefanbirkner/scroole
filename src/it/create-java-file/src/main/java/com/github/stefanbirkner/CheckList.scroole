@@ -1,2 +1,13 @@
+# A check list is a list of items with a title.
+#
+# @since 0.1.0
+
+# Returns the title of the check list.
+#
+# @return the title of the check list.
 title: java.lang.String
+
+# Returns the the check list items.
+#
+# @return the the check list items.
 items: java.util.List<com.github.stefanbirkner.CheckListItem>

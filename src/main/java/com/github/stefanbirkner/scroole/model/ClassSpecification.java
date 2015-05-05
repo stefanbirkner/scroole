@@ -18,6 +18,11 @@ public class ClassSpecification {
     public final String simpleName;
 
     /**
+     * The class' Javadoc.
+     */
+    public final String javadoc;
+
+    /**
      * Specications of the class' fields.
      */
     public final List<Field> fields;
@@ -26,12 +31,14 @@ public class ClassSpecification {
      * Create the specification for a class inside a package.
      * @param packageName the class' package.
      * @param simpleName the class' name.
+     * @param javadoc the class' Javadoc.
      * @param fields specications of the class' fields.
      */
     public ClassSpecification(String packageName, String simpleName,
-            List<Field> fields) {
+            String javadoc, List<Field> fields) {
         this.packageName = packageName;
         this.simpleName = simpleName;
+        this.javadoc = javadoc;
         this.fields = fields;
     }
 
@@ -39,11 +46,12 @@ public class ClassSpecification {
      * Create the specification for a class wihtout a package (aka the default
      * package).
      * @param simpleName the class' name.
+     * @param javadoc the class' Javadoc.
      * @param fields specications of the class' fields.
      */
-    public ClassSpecification(String simpleName,
+    public ClassSpecification(String simpleName, String javadoc,
             List<Field> fields) {
-        this("", simpleName, fields);
+        this("", simpleName, javadoc, fields);
     }
 
     @Override
@@ -57,6 +65,8 @@ public class ClassSpecification {
             return false;
         if (packageName != null ? !packageName.equals(that.packageName) : that.packageName != null)
             return false;
+        if (javadoc != null ? !javadoc.equals(that.javadoc) : that.javadoc != null)
+            return false;
         if (simpleName != null ? !simpleName.equals(that.simpleName) : that.simpleName != null)
             return false;
 
@@ -67,6 +77,7 @@ public class ClassSpecification {
     public int hashCode() {
         int result = packageName != null ? packageName.hashCode() : 0;
         result = 31 * result + (simpleName != null ? simpleName.hashCode() : 0);
+        result = 31 * result + (javadoc != null ? javadoc.hashCode() : 0);
         result = 31 * result + (fields != null ? fields.hashCode() : 0);
         return result;
     }
@@ -76,6 +87,7 @@ public class ClassSpecification {
         return "ClassSpecification{" +
                 "packageName='" + packageName + '\'' +
                 ", simpleName='" + simpleName + '\'' +
+                ", javadoc='" + javadoc + '\'' +
                 ", fields=" + fields +
                 '}';
     }

@@ -27,7 +27,7 @@ public class ScrooleTest {
     public static class WritesSourceCode {
         @Parameterized.Parameters(name = "{0}")
         public static Object[] data() {
-            return new Object[]{"Simple"};
+            return new Object[]{"Simple", "Javadoc"};
         }
 
         @Parameterized.Parameter(0)

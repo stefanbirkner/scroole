@@ -13,11 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CodeGeneratorTest {
     private static final List<Field> NO_FIELDS = emptyList();
+    private static final String NO_JAVA_DOC = "";
     private final CodeGenerator codeGenerator = new CodeGenerator();
 
     @Test
     public void creates_empty_class_in_default_package() {
-        ClassSpecification model = new ClassSpecification("DummyClass", NO_FIELDS);
+        ClassSpecification model = new ClassSpecification("DummyClass", NO_JAVA_DOC, NO_FIELDS);
         String code = codeGenerator.createCode(model);
         assertThat(code).startsWith("import java.lang.Object;\n"
                 + "import java.lang.Override;\n\npublic class DummyClass {\n");
@@ -25,17 +26,29 @@ public class CodeGeneratorTest {
 
     @Test
     public void adds_package() {
-        ClassSpecification model = new ClassSpecification("a.b", "DummyClass",
+        ClassSpecification model = new ClassSpecification("a.b", "DummyClass", NO_JAVA_DOC,
                 NO_FIELDS);
         String code = codeGenerator.createCode(model);
         assertThat(code).startsWith("package a.b;\n");
     }
 
     @Test
+    public void adds_javadoc_for_class() {
+        ClassSpecification model = new ClassSpecification("a.b", "DummyClass", "dummy javadoc",
+                NO_FIELDS);
+        String code = codeGenerator.createCode(model);
+        assertThat(code).contains(multipleRows(
+                "/**",
+                " * dummy javadoc",
+                " */",
+                "public"));
+    }
+
+    @Test
     public void creates_constructor_with_fields() {
-        ClassSpecification model = new ClassSpecification("DummyClass", asList(
-                new Field("title", "String"),
-                new Field("text", "String")));
+        ClassSpecification model = new ClassSpecification("DummyClass", NO_JAVA_DOC, asList(
+                new Field("title", "String", NO_JAVA_DOC),
+                new Field("text", "String", NO_JAVA_DOC)));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(
                 "public DummyClass(String title, String text) {\n");
@@ -44,7 +57,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_private_final_fields() {
         ClassSpecification model = classModelWithFields(
-                new Field("title", "String"));
+                new Field("title", "String", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains("private final String title;");
     }
@@ -52,7 +65,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_constructor_that_assigns_parameters_to_fields() {
         ClassSpecification model = classModelWithFields(
-                new Field("title", "String"));
+                new Field("title", "String", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains("this.title = title;");
     }
@@ -60,7 +73,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_getter_for_object() {
         ClassSpecification model = classModelWithFields(
-                new Field("title", "String"));
+                new Field("title", "String", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  public String getTitle() {",
@@ -71,7 +84,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_getter_for_primitive() {
         ClassSpecification model = classModelWithFields(
-                new Field("count", "int"));
+                new Field("count", "int", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  public int getCount() {",
@@ -82,7 +95,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_getter_for_array() {
         ClassSpecification model = classModelWithFields(
-                new Field("names", "int[]"));
+                new Field("names", "int[]", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  public int[] getNames() {",
@@ -93,8 +106,8 @@ public class CodeGeneratorTest {
     @Test
     public void creates_getter_for_generics() {
         ClassSpecification model = classModelWithFields(new Field("map",
-                "java.util.Map<java.lang.String, java.lang.Integer>"
-        ));
+                "java.util.Map<java.lang.String, java.lang.Integer>",
+                NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  public Map<String, Integer> getMap() {",
@@ -103,9 +116,21 @@ public class CodeGeneratorTest {
     }
 
     @Test
+    public void adds_javadoc_for_getter() {
+        ClassSpecification model = classModelWithFields(
+                new Field("count", "int", "dummy javadoc"));
+        String code = codeGenerator.createCode(model);
+        assertThat(code).contains(multipleRows(
+                "  /**",
+                "   * dummy javadoc",
+                "   */",
+                "  public"));
+    }
+
+    @Test
     public void creates_equals_method_with_identity_check_for_primitive_field() {
         ClassSpecification model = classModelWithFields(
-                new Field("count", "int"));
+                new Field("count", "int", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  @Override",
@@ -122,7 +147,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_equals_method_with_equality_check_for_object_field() {
         ClassSpecification model = classModelWithFields(
-                new Field("text", "java.lang.String"));
+                new Field("text", "java.lang.String", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  @Override",
@@ -146,7 +171,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_equals_method_that_uses_arrays_equals_for_arrays() {
         ClassSpecification model = classModelWithFields(
-                new Field("numbers", "int[]"));
+                new Field("numbers", "int[]", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  @Override",
@@ -163,7 +188,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_equals_method_that_checks_the_bits_of_floats() {
         ClassSpecification model = classModelWithFields(
-                new Field("value", "float"));
+                new Field("value", "float", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  @Override",
@@ -180,7 +205,7 @@ public class CodeGeneratorTest {
     @Test
     public void creates_equals_method_that_checks_the_bits_of_doubles() {
         ClassSpecification model = classModelWithFields(
-                new Field("value", "double"));
+                new Field("value", "double", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  @Override",
@@ -197,8 +222,8 @@ public class CodeGeneratorTest {
     @Test
     public void creates_equals_method_that_checks_every_field() {
         ClassSpecification model = classModelWithFields(
-                new Field("count", "int"),
-                new Field("text", "java.lang.String"));
+                new Field("count", "int", NO_JAVA_DOC),
+                new Field("text", "java.lang.String", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  @Override",
@@ -216,16 +241,16 @@ public class CodeGeneratorTest {
     @Test
     public void creates_hashCode_method_that_considers_every_field() {
         ClassSpecification model = classModelWithFields(
-                new Field("a", "boolean"),
-                new Field("b", "byte"),
-                new Field("c", "short"),
-                new Field("d", "int"),
-                new Field("e", "long"),
-                new Field("f", "char"),
-                new Field("g", "float"),
-                new Field("h", "double"),
-                new Field("i", "int[]"),
-                new Field("j", "java.lang.String"));
+                new Field("a", "boolean", NO_JAVA_DOC),
+                new Field("b", "byte", NO_JAVA_DOC),
+                new Field("c", "short", NO_JAVA_DOC),
+                new Field("d", "int", NO_JAVA_DOC),
+                new Field("e", "long", NO_JAVA_DOC),
+                new Field("f", "char", NO_JAVA_DOC),
+                new Field("g", "float", NO_JAVA_DOC),
+                new Field("h", "double", NO_JAVA_DOC),
+                new Field("i", "int[]", NO_JAVA_DOC),
+                new Field("j", "java.lang.String", NO_JAVA_DOC));
         String code = codeGenerator.createCode(model);
         assertThat(code).contains(multipleRows(
                 "  @Override",
@@ -248,7 +273,7 @@ public class CodeGeneratorTest {
     }
 
     private ClassSpecification classModelWithFields(Field... fields) {
-        return new ClassSpecification("DummyClass", asList(fields));
+        return new ClassSpecification("DummyClass", NO_JAVA_DOC, asList(fields));
     }
 
     private String multipleRows(String... lines) {
